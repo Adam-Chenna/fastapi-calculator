@@ -3,6 +3,11 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+@app.get("/")
+def home():
+    return {"message": "Calculator API is running 🚀"}
+
+
 # Pydantic Model
 class Numbers(BaseModel):
     num1: float
