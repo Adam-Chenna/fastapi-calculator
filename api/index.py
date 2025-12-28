@@ -3,30 +3,46 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
+# Pydantic Model
+class Expression(BaseModel):
+    expression : str
+
 @app.get("/")
 def home():
     return {"message": "Calculator API is running 🚀"}
 
+@app.post("/calculator")
+def calculate(data : Expression):
+    expr = data.expression.replace(" " , "")
 
-# Pydantic Model
-class Numbers(BaseModel):
-    num1: float
-    num2: float
+    if "+" in expr :
+        a,b = expr.split("+")
+        result = float(a) + float(b)
 
-@app.post("/add")
-def add(numbers: Numbers):
-    return {"result": numbers.num1 + numbers.num2}
+    elif "-" in expr:
+        a,b = expr.split("-")
+        result = float(a) - float(b)
+         
+    elif "*" in expr:
+        a,b = expr.split("*")
+        result = float(a) * float(b)
+    
+    elif "/" in expr:
+        a,b = expr.split("/")
+        if b == 0:
+            return{"Error" : "Cannot divide by zero"}
+        
+        else:
+            result = float(a) / float(b)
+    
+    else:
+        return {"Error" : "Invalid Choice"}
+    
+    return {
+        "expression" : data.expression,
+        "result": result
+    }
 
-@app.post("/subtract")
-def subtract(numbers: Numbers):
-    return {"result": numbers.num1 - numbers.num2}
 
-@app.post("/multiply")
-def multiply(numbers: Numbers):
-    return {"result": numbers.num1 * numbers.num2}
 
-@app.post("/divide")
-def divide(numbers: Numbers):
-    if numbers.num2 == 0:
-        return {"error": "Division by zero not allowed"}
-    return {"result": numbers.num1 / numbers.num2}
+
