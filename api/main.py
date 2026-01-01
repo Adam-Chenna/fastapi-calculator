@@ -1,33 +1,34 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import math
 
 app = FastAPI()
 
-@app.get("/calculator")
 
-def calc(a : float , b : float , op = str):
-    if op == "+":
+class Expression(BaseModel):
+    expression: str
+
+
+@app.post("/calculate")
+def calculate(data: Expression):
+    expr = data.expression
+
+    expr = expr.replace("^2", "**2")
+    expr = expr.replace("sqrt", "math.sqrt")
+
+    try:
+        result = eval(
+            expr,
+            {"__builtins__": None, "math": math},
+            {}
+        )
         return {
-            "Result" : {a+b}
+            "expression": data.expression,
+            "result": result
         }
-    
-    elif op == "-":
-        return {
-            "Result" : {a-b}
-        }
-    
-    elif op == "*":
-        return {
-            "Result" : {a*b}
-        }
-    
-    elif op == "/":
-        return {
-            "Result" : {a/b}
-        }
-    
-    else:
-        Result : {Result}
-        Expression : {op}
-        return {
-            "Error" : "Invalid Operator"
-        }
+
+    except:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid expression"
+        )
